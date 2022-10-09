@@ -17,6 +17,17 @@ public class Task {
         this.description = description;
         this.status = "NEW";
     }
+
+    public Task(String name, String description, String status) {
+        this.name = name;
+        this.description = description;
+        if (status.equals("NEW")||(status.equals("IN_PROGRESS"))||(status.equals("DONE"))) {
+            this.status = status;
+        } else {
+            this.status = "NEW";
+        }
+    }
+
     //методы
     @Override
     public boolean equals(Object o) {
@@ -55,5 +66,21 @@ public class Task {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

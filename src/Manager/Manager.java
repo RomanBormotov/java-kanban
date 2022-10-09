@@ -10,9 +10,8 @@ import java.util.List;
 
 public class Manager {
     //поля
-    private int taskID = 0;
-    private int subtaskID = 0;
-    private int epicID = 0;
+    private int keyID = 0;
+
     private HashMap<Integer, Task> tasks = new HashMap<>(); // хранит задачи типа Task
     private HashMap<Integer, Subtask> subtasks = new HashMap<>(); // хранит задачи типа Subtask
     private HashMap<Integer, Epic> epics = new HashMap<>(); // хранит задачи типа Epic
@@ -52,7 +51,7 @@ public class Manager {
     }
     //2.4 Создание
     public void createTask(Task task) {
-        task.setId(taskID++);
+        task.setId(keyID++);
         tasks.put(task.getId(), task);
         System.out.println("Таск успешно создан");
     }
@@ -62,20 +61,21 @@ public class Manager {
             return;
         }
         subtask.setEpicId(epicID);
-        subtask.setId(subtaskID++);
+        subtask.setId(keyID++);
         subtasks.put(subtask.getId(), subtask);
+        epics.get(subtask.getEpicId()).addSubtasks(subtask);
         System.out.println("Сабтаск успешно создан и добавлен в эпик");
     }
     public void createEpic(Epic epic) {
-        epic.setId(epicID++);
+        epic.setId(keyID++);
         epics.put(epic.getId(), epic);
         System.out.println("Эпик успешно создан");
     }
     //2.5 Обновление
-    public void updateTask(int taskID, Task task) {
-        if (tasks.containsKey(taskID)) {
-            task.setStatus(tasks.get(taskID).getStatus());
-            task.setId(taskID);
+    public void updateTask(int keyID, Task task) {
+        if (tasks.containsKey(keyID)) {
+            task.setStatus(tasks.get(keyID).getStatus());
+            task.setId(keyID);
             tasks.put(task.getId(), task);
             System.out.println("Таск успешно обновлен");
         } else {
@@ -84,23 +84,24 @@ public class Manager {
                     "данный таск, либо проверьте ID, который вы указали");
         }
     }
-    public void updateSubtask(int subtaskID, Subtask subtask) {
-        if (subtasks.containsKey(subtaskID)) {
-            subtask.setStatus(subtasks.get(subtaskID).getStatus());
-            subtask.setId(subtaskID);
-            subtask.setEpicId(subtasks.get(subtaskID).getEpicId());
+    public void updateSubtask(int keyID, Subtask subtask) {
+        if (subtasks.containsKey(keyID)) {
+            subtask.setStatus(subtasks.get(keyID).getStatus());
+            subtask.setId(keyID);
+            subtask.setEpicId(subtasks.get(keyID).getEpicId());
             subtasks.put(subtask.getId(), subtask);
             System.out.println("Сабтаск успешно обновлен");
+            updateStatus(epics.get(subtasks.get(keyID).getEpicId()));
         } else {
             System.out.println("Данный Сабтаск не существует, в связи с " +
                     "этим обновить его невозможно. Попробуйте создать " +
                     "данный Сабтаск, либо проверьте ID, который вы указали");
         }
     }
-    public void updateEpic(int epicID, Epic epic) {
-        if (epics.containsKey(epicID)) {
+    public void updateEpic(int keyID, Epic epic) {
+        if (epics.containsKey(keyID)) {
             updateStatus(epic);
-            epic.setId(epicID);
+            epic.setId(keyID);
             epics.put(epic.getId(), epic);
             System.out.println("Эпик успешно обновлен");
         } else {
@@ -120,7 +121,10 @@ public class Manager {
     }
     public void removeSubtaskOnID(int ID) {
         if (subtasks.containsKey(ID)) {
+            Subtask subtask = subtasks.get(ID);
+            Epic epic = epics.get(subtask.getEpicId());
             subtasks.remove(ID);
+            epic.removeSubtasks(subtask);
             System.out.println("Сабтаск успешно удален");
             return;
         }
@@ -170,7 +174,7 @@ public class Manager {
                 countDone++;
             }
         }
-        if (countNew > 0) {
+        if (countNew == subtasks.size()) {
             epic.setStatus("NEW");
             return;
         }
@@ -180,5 +184,7 @@ public class Manager {
         }
         epic.setStatus("IN_PROGRESS");
     }
+
+
 }
 
