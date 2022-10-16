@@ -1,13 +1,13 @@
-import Manager.Manager;
-import Tasks.Epic;
-import Tasks.Subtask;
-import Tasks.Task;
+import manager.InMemoryTaskManager;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        Manager manager = new Manager();
+        InMemoryTaskManager InMemoryTaskManager = new InMemoryTaskManager();
 
         Task task1 = new Task("Собрать вещи", "Уложить в коробки", "DONE");
         Task task2 = new Task("Собрать вещи", "Заклеить коробки", "DONE");
@@ -18,35 +18,42 @@ public class Main {
         Epic epic2 = new Epic("Очистка квартиры", "Вызвать клининг");
         Subtask subtask3 = new Subtask("Оценить работу клининга", "Осмотр квартиры после уборки");
 
-        manager.createTask(task1);
-        manager.createTask(task2);
-        manager.createEpic(epic1);
-        manager.createSubtask(epic1.getId(), subtask1);
-        manager.createSubtask(epic1.getId(), subtask2);
-        manager.updateTask(task1.getId(), task1);
-        manager.updateTask(task2.getId(), task2);
-        manager.updateEpic(epic1.getId(), epic1);
-        manager.updateSubtask(subtask1.getId(), subtask1);
-        manager.updateSubtask(subtask2.getId(), subtask2);
-        System.out.println(manager.getSubtasks());
-        System.out.println(manager.getTasks());
-        System.out.println(manager.getEpicOnID(epic1.getId()));
+        InMemoryTaskManager.createTask(task1);
+        InMemoryTaskManager.createTask(task2);
+        InMemoryTaskManager.createEpic(epic1);
+        InMemoryTaskManager.createSubtask(epic1.getId(), subtask1);
+        InMemoryTaskManager.createSubtask(epic1.getId(), subtask2);
 
-        manager.removeSubtaskOnID(subtask1.getId());
+        InMemoryTaskManager.updateTask(task1.getId(), task1);
+        InMemoryTaskManager.updateTask(task2.getId(), task2);
+        InMemoryTaskManager.updateEpic(epic1.getId(), epic1);
+        InMemoryTaskManager.updateSubtask(subtask1.getId(), subtask1);
+        InMemoryTaskManager.updateSubtask(subtask2.getId(), subtask2);
+        System.out.println(InMemoryTaskManager.getSubtasks());
+        System.out.println(InMemoryTaskManager.getTasks());
+        System.out.println(InMemoryTaskManager.getEpicOnID(epic1.getId()));
+        InMemoryTaskManager.getTaskOnID(task1.getId());
+        InMemoryTaskManager.getSubtaskOnID(subtask1.getId());
 
-        System.out.println(manager.getEpics());
-        System.out.println(manager.getSubtasks());
+        System.out.println(InMemoryTaskManager.getHistory());
 
-        manager.removeEpicOnID(epic1.getId());
-        manager.createEpic(epic2);
-        manager.createSubtask(epic2.getId(), subtask3);
 
-        System.out.println(manager.getEpics());
-        System.out.println(manager.getTasks());
-        System.out.println(manager.getSubtasks());
 
-        System.out.println(manager.getEpicOnID(epic1.getId()));
-        System.out.println(manager.getEpicOnID(epic2.getId()));
+        InMemoryTaskManager.removeSubtaskOnID(subtask1.getId());
+
+        System.out.println(InMemoryTaskManager.getEpics());
+        System.out.println(InMemoryTaskManager.getSubtasks());
+
+        InMemoryTaskManager.removeEpicOnID(epic1.getId());
+        InMemoryTaskManager.createEpic(epic2);
+        InMemoryTaskManager.createSubtask(epic2.getId(), subtask3);
+
+        System.out.println(InMemoryTaskManager.getEpics());
+        System.out.println(InMemoryTaskManager.getTasks());
+        System.out.println(InMemoryTaskManager.getSubtasks());
+
+        System.out.println(InMemoryTaskManager.getEpicOnID(epic1.getId()));
+        System.out.println(InMemoryTaskManager.getEpicOnID(epic2.getId()));
 
     }
 }

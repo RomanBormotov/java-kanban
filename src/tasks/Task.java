@@ -1,4 +1,4 @@
-package Tasks;
+package tasks;
 
 import java.util.Objects;
 
@@ -7,24 +7,24 @@ public class Task {
     private String name;
     private String description;
     //(!) по идее поле ниже (id) можно вообще удалить, так как все манипуляции
-    // с id по сути завязаны на одноименном ключе в классе Manager,
+    // с id по сути завязаны на одноименном ключе в классе InMemoryTaskManager,
     // в ключах соответствующих коллекций.
     private int id;
-    private String status;
+    private Status status;
     //конструтор
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
-        this.status = "NEW";
+        this.status = Status.NEW;
     }
 
     public Task(String name, String description, String status) {
         this.name = name;
         this.description = description;
         if (status.equals("NEW")||(status.equals("IN_PROGRESS"))||(status.equals("DONE"))) {
-            this.status = status;
+            this.status = Status.valueOf(status);
         } else {
-            this.status = "NEW";
+            this.status = Status.NEW;
         }
     }
 
@@ -61,11 +61,11 @@ public class Task {
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        this.status = Status.valueOf(status);
     }
 
     public String getStatus() {
-        return status;
+        return status.name();
     }
 
     public String getName() {
