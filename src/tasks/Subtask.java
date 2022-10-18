@@ -2,6 +2,8 @@ package tasks;
 
 public class Subtask extends Task {
 
+    private int epicID; //указывает к какому эпику относится
+
     @Override
     public boolean equals(Object o) {
         return super.equals(o);
@@ -22,8 +24,6 @@ public class Subtask extends Task {
                 ", EpicID='" + epicID + '\'' +
                 '}';
     }
-
-    private int epicID; //указывает к какому эпику относится
 
     public Subtask(String name, String description) {
         super(name, description);

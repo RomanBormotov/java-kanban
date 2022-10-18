@@ -12,7 +12,7 @@ public class InMemoryTaskManager implements TaskManager {
     //поля
 
     private HistoryManager historyManager = Managers.getDefaultHistory();
-    private List<Task> history = new ArrayList<>();
+
     private int keyID = 0;
 
     private HashMap<Integer, Task> tasks = new HashMap<>(); // хранит задачи типа Task
@@ -57,28 +57,19 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     //2.3 Получение по идентификатору
     public Task getTaskOnID(int ID) {
-        if (history.size() == 10) {
-            history.remove(0);
-        }
-        history.add(tasks.get(ID));
+        historyManager.add(tasks.get(ID));
         return tasks.get(ID);
     }
 
     @Override
     public Subtask getSubtaskOnID(int ID) {
-        if (history.size() == 10) {
-            history.remove(0);
-        }
-        history.add(subtasks.get(ID));
+        historyManager.add(subtasks.get(ID));
         return subtasks.get(ID);
     }
 
     @Override
     public Epic getEpicOnID(int ID) {
-        if (history.size() == 10) {
-            history.remove(0);
-        }
-        history.add(epics.get(ID));
+        historyManager.add(epics.get(ID));
         return epics.get(ID);
     }
 

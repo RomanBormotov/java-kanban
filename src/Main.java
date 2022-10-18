@@ -1,4 +1,6 @@
 import manager.InMemoryTaskManager;
+import manager.Managers;
+import manager.TaskManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -7,7 +9,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        InMemoryTaskManager InMemoryTaskManager = new InMemoryTaskManager();
+        TaskManager InMemoryTaskManager = Managers.getDefault();
+        //InMemoryTaskManager InMemoryTaskManager = new InMemoryTaskManager();
 
         Task task1 = new Task("Собрать вещи", "Уложить в коробки", "DONE");
         Task task2 = new Task("Собрать вещи", "Заклеить коробки", "DONE");

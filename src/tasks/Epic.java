@@ -22,12 +22,19 @@ public class Epic extends Task {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Epic epic = (Epic) o;
+        return this.subtasks == epic.subtasks;
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        int hash = 17;
+        if (subtasks != null) {
+            hash = subtasks.hashCode();
+        }
+        return hash;
     }
 
     @Override
