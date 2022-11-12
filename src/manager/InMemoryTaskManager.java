@@ -151,6 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeTaskOnID(int ID) {
         if (tasks.containsKey(ID)) {
             tasks.remove(ID);
+            historyManager.remove(ID);
             System.out.println("Таск успешно удален");
             return;
         }
@@ -164,6 +165,7 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = epics.get(subtask.getEpicId());
             subtasks.remove(ID);
             epic.removeSubtasks(subtask);
+            historyManager.remove(ID);
             System.out.println("Сабтаск успешно удален");
             return;
         }
@@ -174,10 +176,13 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpicOnID(int ID) {
         if (epics.containsKey(ID)) {
             epics.remove(ID);
+            historyManager.remove(ID);
+
             ArrayList<Subtask> copy = new ArrayList<>(subtasks.values());
             for (Subtask subtask : copy) {
                 if (subtask.getEpicId() == ID) {
                     subtasks.remove(subtask.getId()); //единственная строчка, где использовал поле ID непосредственно объекта
+                    historyManager.remove(subtask.getId());
                 }
             }
             System.out.println("Эпик и его Сабтаски успешно удалены");
