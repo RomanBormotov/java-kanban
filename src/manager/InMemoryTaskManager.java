@@ -10,7 +10,6 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
     //поля
-
     private HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int keyID = 0;

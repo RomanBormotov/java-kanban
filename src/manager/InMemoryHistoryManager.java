@@ -10,8 +10,6 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-
-
     Map<Integer, Node<Task>> nodes = new HashMap<>();
 
     Node<Task> first;
@@ -25,11 +23,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         remove(task.getId()); // сначала remove для очистки
         linkLast(task); // привязываем таск
         nodes.put(task.getId(), last); //
-
-        /* if (history.size() == 10) { //реализация из предыдущих ТЗ
-            history.remove(0);
-        }
-        history.add(task); */
     }
 
     @Override
