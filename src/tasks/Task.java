@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public class Task {
     //поля
+    private int epicID;
     private String name;
     private String description;
     //(!) по идее поле ниже (id) можно вообще удалить, так как все манипуляции
@@ -11,6 +12,8 @@ public class Task {
     // в ключах соответствующих коллекций.
     private int id;
     private Status status;
+
+    private TaskType taskType = TaskType.TASK;
     //конструтор
     public Task(String name, String description) {
         this.name = name;
@@ -83,4 +86,21 @@ public class Task {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public Integer getEpicId() { // нужен для получения ID в случае когда у эпика нет ID
+        return null; //
+    }
+
+    public TaskType getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(TaskType taskType) {
+        this.taskType = taskType;
+    }
+
+    public void setEpicId(int epicID) {
+        this.epicID = epicID;
+    }
+
 }

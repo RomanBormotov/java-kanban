@@ -4,7 +4,10 @@ import java.util.ArrayList;
 
 public class Epic extends Task {
 
+    private int epicID;
     ArrayList<Integer> subtasks = new ArrayList<>();
+
+    private TaskType taskType = TaskType.EPIC;
 
     public ArrayList<Integer> getSubtasks() {
         return subtasks;
@@ -53,4 +56,19 @@ public class Epic extends Task {
         super(name, description);
     }
 
+    public Integer getEpicId() {
+        return null;
+    }
+
+    public TaskType getTaskType() {
+        return taskType;
+    }
+
+    @Override
+    public void setTaskType(TaskType taskType) {
+        this.taskType = taskType;
+    }
+    public void setEpicId(int epicID) {
+        this.epicID = epicID;
+    }
 }

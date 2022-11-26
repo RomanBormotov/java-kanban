@@ -39,7 +39,7 @@ public class Main {
         System.out.println(InMemoryTaskManager.getSubtasks());
         System.out.println(InMemoryTaskManager.getTasks()); */
 
-        InMemoryTaskManager.getEpicOnID(epic1.getId());
+        /* InMemoryTaskManager.getEpicOnID(epic1.getId());
 
         InMemoryTaskManager.getTaskOnID(task1.getId());
         InMemoryTaskManager.getTaskOnID(task2.getId());
@@ -59,7 +59,7 @@ public class Main {
         InMemoryTaskManager.removeSubtaskOnID(subtask2.getId());
         InMemoryTaskManager.removeEpicOnID(epic1.getId());
 
-        System.out.println(InMemoryTaskManager.getHistory());
+        System.out.println(InMemoryTaskManager.getHistory()); */
 
         /* InMemoryTaskManager.removeSubtaskOnID(subtask1.getId());
 

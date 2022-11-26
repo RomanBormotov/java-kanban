@@ -4,6 +4,8 @@ public class Subtask extends Task {
 
     private int epicID; //указывает к какому эпику относится
 
+    private TaskType taskType = TaskType.SUBTASK;
+
     @Override
     public boolean equals(Object o) {
         return super.equals(o);
@@ -33,12 +35,21 @@ public class Subtask extends Task {
         super(name, description, status);
     }
 
-    public int getEpicId() {
+    public Integer getEpicId() {
         return epicID;
     }
 
     public void setEpicId(int epicID) {
         this.epicID = epicID;
+    }
+
+    public TaskType getTaskType() {
+        return taskType;
+    }
+
+    @Override
+    public void setTaskType(TaskType taskType) {
+        this.taskType = taskType;
     }
 }
 

@@ -3,6 +3,7 @@ package manager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
+import tasks.TaskType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,13 +11,13 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
     //поля
-    private HistoryManager historyManager = Managers.getDefaultHistory();
+    protected HistoryManager historyManager = Managers.getDefaultHistory();
 
-    private int keyID = 0;
+    protected int keyID = 0;
 
-    private HashMap<Integer, Task> tasks = new HashMap<>(); // хранит задачи типа Task
-    private HashMap<Integer, Subtask> subtasks = new HashMap<>(); // хранит задачи типа Subtask
-    private HashMap<Integer, Epic> epics = new HashMap<>(); // хранит задачи типа Epic
+    protected HashMap<Integer, Task> tasks = new HashMap<>(); // хранит задачи типа Task
+    protected HashMap<Integer, Subtask> subtasks = new HashMap<>(); // хранит задачи типа Subtask
+    protected HashMap<Integer, Epic> epics = new HashMap<>(); // хранит задачи типа Epic
     //методы
     //2.1 Получение списка всех задач
     @Override
@@ -77,6 +78,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void createTask(Task task) {
         task.setId(keyID++);
         tasks.put(task.getId(), task);
+        //TaskType.valueOf("TYPE");
         System.out.println("Таск успешно создан");
     }
 
@@ -237,7 +239,6 @@ public class InMemoryTaskManager implements TaskManager {
         System.out.println("История задач");
         return historyManager.getHistory();
     }
-
 
 }
 
