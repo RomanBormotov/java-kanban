@@ -52,7 +52,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     //восстанавливает менеджер из файла
     public static FileBackedTasksManager loadFromFile(File file) { // метод, который будет создавать FileBackedTasksManager
-        // создать через конструктор FileBackedTasksManager
         FileBackedTasksManager fileBackedTasksManager =
                 (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
         int generatorId = 0;
@@ -68,12 +67,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
             // сплитим по строкам в цикле
             String[] buffer = allInfo.split("\n");
-            // проверить!, нельзя оставлять генератор ID нулевым, надо его восстановить, какой был последний
-            // Десериализуем таск из строки, например получили Task task = ...
-            // Если task.id > generatorId, то generatorId = task.id
-            // если мы наткнулись на пустую строку, то это - история, то парсим её
-            // добавить таск в соответсвующую мапу (switch по типу)
-            //System.out.println(buffer);
+            /* проверить!, нельзя оставлять генератор ID нулевым, надо его восстановить, какой был последний
+            Десериализуем таск из строки, например получили Task task = ...
+            Если task.id > generatorId, то generatorId = task.id
+            если мы наткнулись на пустую строку, то это - история, то парсим её
+            добавить таск в соответсвующую мапу (switch по типу) */
+
             for (int i = 1; i < buffer.length - 2; i++) {
                 Task task = CSVTaskConverter.fromString(buffer[i]);
                 if (task.getId() > generatorId) {
@@ -94,10 +93,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
             List<Integer> history = CSVTaskConverter.historyFromString(buffer[buffer.length-1]);
-            //String[] history = buffer[buffer.length-1].split(",");
-            // дообработать историю
-            // пройтись по списку id из десериализованной истории и добавить в историю с помощью уже существующего метода
-            // historyManager.add(..)
+            /* String[] history = buffer[buffer.length-1].split(",");
+            дообработать историю
+            пройтись по списку id из десериализованной истории и добавить в историю с помощью уже существующего метода
+            historyManager.add(..) */
             for (int currentId: history) {
 
                 if (fileBackedTasksManager.epics.containsKey(currentId)) {
@@ -117,17 +116,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return fileBackedTasksManager;
     }
 
-    public void save () { // в методе Save будет происходить сохранение текущего состояния менеджера в файл
-        // try(-with-resources) { BufferedReader writer = ...
+    public void save () { // в методе Save будет происходить сохранение текущего состояния менеджера в файл.
         try(BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
-            // writer.write(CSVTaskFormater.getHeader())
             fileWriter.write("id,type,name,status,description,epic");
-            // Пишем в файл перенос строки - writer.newLine()
             fileWriter.newLine();
-            // Сериализация и запись тасков
-            // По очереди проходим в for кажду мапу с таском
-            // Внутри каждого for мы сериализуем таску CSVTaskFormater.toString(task)
-            // записать новую строку (доп перенос строки)
+            /*Сериализация и запись тасков
+            По очереди проходим в for кажду мапу с таском
+            Внутри каждого for мы сериализуем таску CSVTaskFormater.toString(task)
+            записать новую строку (доп перенос строки) */
             for (Task task: tasks.values()) {
                 fileWriter.write(CSVTaskConverter.toString(task));
                 fileWriter.newLine();
@@ -140,15 +136,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 fileWriter.write(CSVTaskConverter.toString(epic));
                 fileWriter.newLine();
             }
-            // сериализуем историю
-            // CSVTaskFormater.historyToString()
             fileWriter.newLine();
             fileWriter.write(CSVTaskConverter.historyToString(historyManager));
 
         } catch (IOException e) {
             throw new ManagerSaveException();
         }
-
     }
 
     @Override
