@@ -6,13 +6,14 @@ import tasks.Task;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-  public interface TaskManager {
+public interface TaskManager {
 
-      HashMap<Integer, Task> getTasks();
+      Map<Integer, Task> getTasks();
 
-      HashMap<Integer, Subtask> getSubtasks();
-      HashMap<Integer, Epic> getEpics();
+      Map<Integer, Subtask> getSubtasks();
+      Map<Integer, Epic> getEpics();
       void removeTasks();
       void removeSubtasks();
       void removeEpics();

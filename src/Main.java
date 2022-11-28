@@ -4,12 +4,13 @@ import manager.TaskManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
+import tasks.TaskManagerType;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager InMemoryTaskManager = Managers.getDefault();
+        TaskManager InMemoryTaskManager = Managers.getDefault(TaskManagerType.INNER);
         //InMemoryTaskManager InMemoryTaskManager = new InMemoryTaskManager();
 
         Task task1 = new Task("Собрать вещи", "Уложить в коробки", "DONE");

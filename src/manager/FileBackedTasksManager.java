@@ -3,6 +3,7 @@ package manager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
+import tasks.TaskManagerType;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -11,7 +12,8 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(new File("C:\\Users\\ROMAN\\dev\\java-kanban\\src\\history"));
+        FileBackedTasksManager fileBackedTasksManager =
+                (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
         Task task1 = new Task("Собрать вещи", "Уложить в коробки", "DONE");
         Task task2 = new Task("Собрать вещи", "Заклеить коробки", "DONE");
         Epic epic1 = new Epic("Переезд", "В другую квартиру");
@@ -36,7 +38,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedTasksManager.getSubtaskOnID(subtask1.getId());
         System.out.println(CSVTaskConverter.historyToString(fileBackedTasksManager.historyManager));
 
-        FileBackedTasksManager fileBackedTasksManager2 = loadFromFile(new File("C:\\Users\\ROMAN\\dev\\java-kanban\\src\\history"));
+        FileBackedTasksManager fileBackedTasksManager2 =
+                (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
         System.out.println(fileBackedTasksManager2.getHistory());
 
     }
@@ -50,12 +53,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     //восстанавливает менеджер из файла
     public static FileBackedTasksManager loadFromFile(File file) { // метод, который будет создавать FileBackedTasksManager
         // создать через конструктор FileBackedTasksManager
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
+        FileBackedTasksManager fileBackedTasksManager =
+                (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
         int generatorId = 0;
-        // наполняем файл
-        // обернем все в try, пытаясь поймать IOExceptions
-        // прочитать из файла содержимое
-        // Files.readString(Path.of(path));
+        /* наполняем файл
+        обернем все в try, пытаясь поймать IOExceptions
+        прочитать из файла содержимое
+        Files.readString(Path.of(path)); */
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String allInfo = "";
             String currentString;

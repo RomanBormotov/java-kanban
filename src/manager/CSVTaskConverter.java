@@ -60,17 +60,17 @@ public class CSVTaskConverter {
     public static List<Integer> historyFromString(String value){
         List<Integer> history = new ArrayList<>();
         String [] splitString = value.split(",");
-        for (int i = 0; i < splitString.length; i++) {
-            history.add(Integer.valueOf(splitString[i]));
+        for (String s : splitString) {
+            history.add(Integer.valueOf(s));
         }
         return history;
     }
     public static String historyToString(HistoryManager historyManager){
-        String returnString = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < historyManager.getHistory().size(); i++) {
-            returnString += historyManager.getHistory().get(i).getId() + " ";
+            result.append(historyManager.getHistory().get(i).getId()).append(" ");
         }
-        String resultString = returnString.trim();
+        String resultString = result.toString().trim();
 
         return resultString.replace(" ", ",");
     }

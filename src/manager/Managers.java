@@ -1,20 +1,31 @@
 package manager;
 
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
+import tasks.TaskManagerType;
 
-import java.util.HashMap;
-import java.util.List;
+import java.io.File;
 
 public class Managers {
 
-    public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+    private static File taskStorageFile = new File("tasks.csv");
+
+    public static TaskManager getDefault(TaskManagerType type) {
+        switch (type) {
+            case INNER:
+                return new InMemoryTaskManager();
+            case FILE_BACKEND:
+                return new FileBackedTasksManager(taskStorageFile);
+        }
+        return null;
     }
 
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
+
+    /* public static FileBackedTasksManager loadFromFile(){
+        FileBackedTasksManager manager = getDefaultFileBackedTasksManager();
+        manager.loadFromFile(taskStorageFile);
+        return manager;
+    } */
 
 }

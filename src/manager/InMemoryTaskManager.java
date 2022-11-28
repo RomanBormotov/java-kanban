@@ -1,9 +1,6 @@
 package manager;
 
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
-import tasks.TaskType;
+import tasks.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +9,6 @@ import java.util.List;
 public class InMemoryTaskManager implements TaskManager {
     //поля
     protected HistoryManager historyManager = Managers.getDefaultHistory();
-
     protected int keyID = 0;
 
     protected HashMap<Integer, Task> tasks = new HashMap<>(); // хранит задачи типа Task
