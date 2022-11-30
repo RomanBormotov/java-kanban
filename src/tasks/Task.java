@@ -21,6 +21,12 @@ public class Task {
         this.status = Status.NEW;
     }
 
+    public Task(String name, String description, Status status) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
     public Task(String name, String description, String status) {
         this.name = name;
         this.description = description;
@@ -63,8 +69,8 @@ public class Task {
         return id;
     }
 
-    public void setStatus(String status) {
-        this.status = Status.valueOf(status);
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public String getStatus() {

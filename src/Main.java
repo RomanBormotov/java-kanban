@@ -1,10 +1,7 @@
 import manager.InMemoryTaskManager;
 import manager.Managers;
 import manager.TaskManager;
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
-import tasks.TaskManagerType;
+import tasks.*;
 
 public class Main {
 
@@ -16,9 +13,9 @@ public class Main {
         Task task1 = new Task("Собрать вещи", "Уложить в коробки", "DONE");
         Task task2 = new Task("Собрать вещи", "Заклеить коробки", "DONE");
         Epic epic1 = new Epic("Переезд", "В другую квартиру");
-        Subtask subtask1 = new Subtask("Вызвать перевозчика", "Позвонить по номеру 000", "DONE");
-        Subtask subtask2 = new Subtask("Отдать ключи", "Вернуть ключи хозяину квартиры", "DONE");
-        Subtask subtask3 = new Subtask("Рассчитаться за аренду квартиры", "Подсчитать месяц оплаты", "NEW");
+        Subtask subtask1 = new Subtask("Вызвать перевозчика", "Позвонить по номеру 000", Status.NEW);
+        Subtask subtask2 = new Subtask("Отдать ключи", "Вернуть ключи хозяину квартиры", Status.DONE);
+        Subtask subtask3 = new Subtask("Рассчитаться за аренду квартиры", "Подсчитать месяц оплаты", Status.NEW);
 
         Epic epic2 = new Epic("Очистка квартиры", "Вызвать клининг");
 

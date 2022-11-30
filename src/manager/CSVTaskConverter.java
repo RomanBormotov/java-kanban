@@ -1,9 +1,7 @@
 package manager;
 
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
-import tasks.TaskType;
+import jdk.net.SocketFlow;
+import tasks.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +23,8 @@ public class CSVTaskConverter {
         int id = Integer.parseInt(lines[0]);
         TaskType taskType = TaskType.valueOf(lines[1]);
         String name = lines[2];
-        String status = lines[3];
+        String statusString = lines[3];
+        Status status = Status.valueOf(statusString);
         String description = lines[4];
         int epicId = -1;
         if (!lines[5].equals("null")) {
@@ -65,10 +64,10 @@ public class CSVTaskConverter {
         }
         return history;
     }
-    public static String historyToString(HistoryManager historyManager){
+    public static String historyToString(List<Task> history){
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < historyManager.getHistory().size(); i++) {
-            result.append(historyManager.getHistory().get(i).getId()).append(" ");
+        for (int i = 0; i < history.size(); i++) {
+            result.append(history.get(i).getId()).append(" ");
         }
         String resultString = result.toString().trim();
 

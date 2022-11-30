@@ -84,6 +84,9 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Сабтаск не может быть создан, так как указанный Эпик отсутствует.");
             return;
         }
+        if (epics.get(epicID).getStatus().equals(Status.DONE.toString())) {
+            epics.get(epicID).setStatus(Status.IN_PROGRESS);
+        }
         subtask.setEpicId(epicID);
         subtask.setId(keyID++);
         subtasks.put(subtask.getId(), subtask);
@@ -102,7 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(int keyID, Task task) {
         if (tasks.containsKey(keyID)) {
-            task.setStatus(tasks.get(keyID).getStatus());
+            task.setStatus(Status.valueOf(tasks.get(keyID).getStatus()));
             task.setId(keyID);
             tasks.put(task.getId(), task);
             System.out.println("Таск успешно обновлен");
@@ -116,7 +119,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(int keyID, Subtask subtask) {
         if (subtasks.containsKey(keyID)) {
-            subtask.setStatus(subtasks.get(keyID).getStatus());
+            subtask.setStatus(Status.valueOf(subtasks.get(keyID).getStatus()));
             subtask.setId(keyID);
             subtask.setEpicId(subtasks.get(keyID).getEpicId());
             subtasks.put(subtask.getId(), subtask);
@@ -207,7 +210,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateStatus(Epic epic) {
         List<Subtask> subtasks = getEpicSubtasks(epic.getId());
         if (subtasks.isEmpty()) {
-            epic.setStatus("NEW");
+            epic.setStatus(Status.NEW);
             return;
         }
         int countNew = 0;
@@ -220,14 +223,14 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         if (countNew == subtasks.size()) {
-            epic.setStatus("NEW");
+            epic.setStatus(Status.NEW);
             return;
         }
         if (countDone == subtasks.size()) {
-            epic.setStatus("DONE");
+            epic.setStatus(Status.DONE);
             return;
         }
-        epic.setStatus("IN_PROGRESS");
+        epic.setStatus(Status.IN_PROGRESS);
     }
 
     @Override

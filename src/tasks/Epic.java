@@ -14,7 +14,6 @@ public class Epic extends Task {
     }
 
     public void addSubtasks(Subtask subtask) {
-
         subtasks.add(subtask.getId());
     }
 
@@ -56,6 +55,9 @@ public class Epic extends Task {
         super(name, description);
     }
 
+    public Epic(String name, String description, Status status) {
+        super(name, description, status);
+    }
     public Integer getEpicId() {
         return null;
     }

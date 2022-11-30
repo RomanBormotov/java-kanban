@@ -1,9 +1,6 @@
 package manager;
 
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
-import tasks.TaskManagerType;
+import tasks.*;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -12,14 +9,13 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
-        FileBackedTasksManager fileBackedTasksManager =
-                (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
-        Task task1 = new Task("Собрать вещи", "Уложить в коробки", "DONE");
+        TaskManager fileBackedTasksManager = Managers.getDefault(TaskManagerType.FILE_BACKEND);
+        Task task1 = new Task("Собрать вещи", "Уложить в коробки", Status.NEW);
         Task task2 = new Task("Собрать вещи", "Заклеить коробки", "DONE");
         Epic epic1 = new Epic("Переезд", "В другую квартиру");
-        Subtask subtask1 = new Subtask("Вызвать перевозчика", "Позвонить по номеру 000", "DONE");
-        Subtask subtask2 = new Subtask("Отдать ключи", "Вернуть ключи хозяину квартиры", "DONE");
-        Subtask subtask3 = new Subtask("Рассчитаться за аренду квартиры", "Подсчитать месяц оплаты", "NEW");
+        Subtask subtask1 = new Subtask("Вызвать перевозчика", "Позвонить по номеру 000", Status.NEW);
+        Subtask subtask2 = new Subtask("Отдать ключи", "Вернуть ключи хозяину квартиры", Status.NEW);
+        Subtask subtask3 = new Subtask("Рассчитаться за аренду квартиры", "Подсчитать месяц оплаты", Status.DONE);
 
         Epic epic2 = new Epic("Очистка квартиры", "Вызвать клининг");
 
@@ -36,11 +32,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         fileBackedTasksManager.getTaskOnID(task1.getId());
         fileBackedTasksManager.getSubtaskOnID(subtask1.getId());
-        System.out.println(CSVTaskConverter.historyToString(fileBackedTasksManager.historyManager));
+        System.out.println(CSVTaskConverter.historyToString(fileBackedTasksManager.getHistory()));
+        System.out.println("..............................................................");
 
-        FileBackedTasksManager fileBackedTasksManager2 =
-                (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
+        TaskManager fileBackedTasksManager2 = loadFromFile(new File("tasks.csv"));
         System.out.println(fileBackedTasksManager2.getHistory());
+        System.out.println(fileBackedTasksManager2.getEpics());
 
     }
 
@@ -91,6 +88,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         fileBackedTasksManager.subtasks.put(task.getId(), (Subtask) task);
                 }
             }
+            for (Epic epic: fileBackedTasksManager.epics.values()) {
+                for (Subtask subtask: fileBackedTasksManager.subtasks.values()) {
+                    if (subtask.getEpicId() == epic.getId()) {
+                        epic.addSubtasks(subtask);
+                    }
+                }
+            }
 
             List<Integer> history = CSVTaskConverter.historyFromString(buffer[buffer.length-1]);
             /* String[] history = buffer[buffer.length-1].split(",");
@@ -137,7 +141,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 fileWriter.newLine();
             }
             fileWriter.newLine();
-            fileWriter.write(CSVTaskConverter.historyToString(historyManager));
+            fileWriter.write(CSVTaskConverter.historyToString(this.getHistory()));
 
         } catch (IOException e) {
             throw new ManagerSaveException();
