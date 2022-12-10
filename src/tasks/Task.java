@@ -1,24 +1,44 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Task {
     //поля
-    private int epicID;
+    private int epicID = -1;
     private String name;
     private String description;
-    //(!) по идее поле ниже (id) можно вообще удалить, так как все манипуляции
-    // с id по сути завязаны на одноименном ключе в классе InMemoryTaskManager,
-    // в ключах соответствующих коллекций.
     private int id;
     private Status status;
-
+    private Duration duration;
+    private LocalDateTime startTime;
     private TaskType taskType = TaskType.TASK;
-    //конструтор
+    protected DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+    //конструторы
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = Status.NEW;
+    }
+
+    public Task(String name, String description, String startTime, int duration) {
+        this.name = name;
+        this.description = description;
+        this.startTime = LocalDateTime.parse(startTime, dtf);
+        this.duration = Duration.ofMinutes(duration);
+        this.status = Status.NEW;
+    }
+
+    //конструктор для тестов
+    public Task(String name, String description, Status status, LocalDateTime startTime, int duration) {
+        this.name = name;
+        this.description = description;
+        this.startTime = startTime;
+        this.duration = Duration.ofMinutes(duration);
+        this.status = status;
     }
 
     public Task(String name, String description, Status status) {
@@ -37,7 +57,36 @@ public class Task {
         }
     }
 
+    public Task(String name, String description, Status status, String startTime, int duration) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.startTime = LocalDateTime.parse(startTime, dtf);
+        this.duration = Duration.ofMinutes(duration);
+    }
+
     //методы
+
+    public LocalDateTime getEndTime() {
+        return startTime.plusMinutes(duration.toMinutes());
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -57,7 +106,10 @@ public class Task {
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
-                ", id=" + id +
+                ", id=" + id +'\'' +
+                ", supposed start time=" + startTime.format(dtf) + '\'' +
+                ", supposed duration(min)=" + duration.toMinutes() + '\'' +
+                ", expected end time=" + getEndTime().format(dtf) +
                 '}';
     }
 
@@ -94,7 +146,7 @@ public class Task {
     }
 
     public Integer getEpicId() { // нужен для получения ID в случае когда у эпика нет ID
-        return null; //
+        return epicID; //
     }
 
     public TaskType getTaskType() {

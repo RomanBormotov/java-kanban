@@ -1,12 +1,16 @@
 package manager;
 
-import jdk.net.SocketFlow;
 import tasks.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CSVTaskConverter {
+
+    private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public static String toString(Task task) { //превращает таск в строку, можно сделать статическим
         return task.getId() + "," +
@@ -14,8 +18,9 @@ public class CSVTaskConverter {
                 task.getName() + "," +
                 task.getStatus() + "," +
                 task.getDescription() + "," +
-                task.getEpicId()
-                ;
+                task.getEpicId() + "," +
+                task.getStartTime().format(dtf) + "," +
+                task.getDuration().toMinutes();
     }
 
     public static Task fromString(String task) {
@@ -26,10 +31,9 @@ public class CSVTaskConverter {
         String statusString = lines[3];
         Status status = Status.valueOf(statusString);
         String description = lines[4];
-        int epicId = -1;
-        if (!lines[5].equals("null")) {
-            epicId = Integer.parseInt(lines[5]);
-        }
+        int epicId = Integer.parseInt(lines[5]);
+        LocalDateTime startTime = LocalDateTime.parse(lines[6], dtf);
+        int duration = Integer.parseInt(lines[7]);
         switch (taskType) {
             case EPIC:
                 Epic epic = new Epic(name, description);
@@ -37,6 +41,8 @@ public class CSVTaskConverter {
                 epic.setTaskType(taskType);
                 epic.setStatus(status);
                 epic.setEpicId(epicId);
+                epic.setStartTime(startTime);
+                epic.setDuration(Duration.ofMinutes(duration));
                 return epic;
             case TASK:
                 Task task1 = new Task(name, description);
@@ -44,6 +50,9 @@ public class CSVTaskConverter {
                 task1.setTaskType(taskType);
                 task1.setStatus(status);
                 task1.setEpicId(epicId);
+                task1.setStartTime(startTime);
+                task1.setDuration(Duration.ofMinutes(duration));
+                task1.setEpicId(-1);
                 return task1;
             case SUBTASK:
                 Subtask subtask = new Subtask(name, description);
@@ -51,6 +60,9 @@ public class CSVTaskConverter {
                 subtask.setTaskType(taskType);
                 subtask.setStatus(status);
                 subtask.setEpicId(epicId);
+                subtask.setStartTime(startTime);
+                subtask.setDuration(Duration.ofMinutes(duration));
+                subtask.setEpicId(-1);
                 return subtask;
         }
         return null;

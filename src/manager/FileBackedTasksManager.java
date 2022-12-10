@@ -3,24 +3,28 @@ package manager;
 import tasks.*;
 
 import java.io.*;
-import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
+
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
         TaskManager fileBackedTasksManager = Managers.getDefault(TaskManagerType.FILE_BACKEND);
-        Task task1 = new Task("Собрать вещи", "Уложить в коробки", Status.NEW);
-        Task task2 = new Task("Собрать вещи", "Заклеить коробки", "DONE");
-        Epic epic1 = new Epic("Переезд", "В другую квартиру");
-        Subtask subtask1 = new Subtask("Вызвать перевозчика", "Позвонить по номеру 000", Status.NEW);
-        Subtask subtask2 = new Subtask("Отдать ключи", "Вернуть ключи хозяину квартиры", Status.NEW);
-        Subtask subtask3 = new Subtask("Рассчитаться за аренду квартиры", "Подсчитать месяц оплаты", Status.DONE);
+        Task task1 = new Task("Собрать вещи", "Уложить в коробки", Status.NEW, "05.05.2022 05:55", 300);
+        Task task2 = new Task("Собрать вещи", "Заклеить коробки", Status.DONE, "05.05.2022 06:30", 360);
+        Epic epic1 = new Epic("Переезд", "В другую квартиру", "12.12.2012 12:12", 999);
+        Subtask subtask1 = new Subtask("Вызвать перевозчика", "Позвонить по номеру 000", Status.NEW, "13.01.2001 00:01", 5);
+        Subtask subtask2 = new Subtask("Отдать ключи", "Вернуть ключи хозяину квартиры", Status.NEW, "29.05.2014 15:15", 20);
+        Subtask subtask3 = new Subtask("Рассчитаться за аренду квартиры", "Подсчитать месяц оплаты", Status.DONE, "17.02.1997 11:11", 16000000);
 
-        Epic epic2 = new Epic("Очистка квартиры", "Вызвать клининг");
+        Epic epic2 = new Epic("Очистка квартиры", "Вызвать клининг","07.07.2007 07:07", 7);
 
         fileBackedTasksManager.createTask(task1);
         fileBackedTasksManager.createTask(task2);
+
         fileBackedTasksManager.createEpic(epic1);
         fileBackedTasksManager.createEpic(epic2);
         fileBackedTasksManager.createSubtask(epic1.getId(), subtask1);
@@ -34,11 +38,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedTasksManager.getSubtaskOnID(subtask1.getId());
         System.out.println(CSVTaskConverter.historyToString(fileBackedTasksManager.getHistory()));
         System.out.println("..............................................................");
-
+        System.out.println("ПРОВЕРКА ЗАГРУЗКИ ВСЕЙ ИНФОРМАЦИИ ИЗ ФАЙЛА");
+        System.out.println("..............................................................");
         TaskManager fileBackedTasksManager2 = loadFromFile(new File("tasks.csv"));
         System.out.println(fileBackedTasksManager2.getHistory());
         System.out.println(fileBackedTasksManager2.getEpics());
 
+        System.out.println("..............................................................");
+        System.out.println("ПРОВЕРКА СОРТИРОВКИ ВСЕХ ТАСКОВ ПО STARTTIME");
+        System.out.println("..............................................................");
+
+        System.out.println(fileBackedTasksManager2.getPrioritizedTasks());
     }
 
     private File file;
@@ -57,13 +67,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         прочитать из файла содержимое
         Files.readString(Path.of(path)); */
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String allInfo = "";
+            StringBuilder allInfo = new StringBuilder();
             String currentString;
             while ((currentString = reader.readLine()) != null) {
-                allInfo += currentString + ("\n");
+                allInfo.append(currentString).append("\n");
             }
             // сплитим по строкам в цикле
-            String[] buffer = allInfo.split("\n");
+            String[] buffer = allInfo.toString().split("\n");
             /* проверить!, нельзя оставлять генератор ID нулевым, надо его восстановить, какой был последний
             Десериализуем таск из строки, например получили Task task = ...
             Если task.id > generatorId, то generatorId = task.id
@@ -91,7 +101,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             for (Epic epic: fileBackedTasksManager.epics.values()) {
                 for (Subtask subtask: fileBackedTasksManager.subtasks.values()) {
                     if (subtask.getEpicId() == epic.getId()) {
-                        epic.addSubtasks(subtask);
+                        epic.addSubtask(subtask);
                     }
                 }
             }
@@ -122,7 +132,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public void save () { // в методе Save будет происходить сохранение текущего состояния менеджера в файл.
         try(BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file))) {
-            fileWriter.write("id,type,name,status,description,epic");
+            fileWriter.write("id,type,   name,  status,  description, epicID, startTime, duration");
             fileWriter.newLine();
             /*Сериализация и запись тасков
             По очереди проходим в for кажду мапу с таском

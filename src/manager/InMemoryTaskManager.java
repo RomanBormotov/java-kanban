@@ -2,9 +2,8 @@ package manager;
 
 import tasks.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     //поля
@@ -14,6 +13,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected HashMap<Integer, Task> tasks = new HashMap<>(); // хранит задачи типа Task
     protected HashMap<Integer, Subtask> subtasks = new HashMap<>(); // хранит задачи типа Subtask
     protected HashMap<Integer, Epic> epics = new HashMap<>(); // хранит задачи типа Epic
+    protected TreeMap<LocalDateTime, Task> sortedTasks = new TreeMap<>();
+
     //методы
     //2.1 Получение списка всех задач
     @Override
@@ -41,12 +42,18 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeSubtasks() {
         subtasks.clear();
+        for (Epic e : epics.values()) {
+            e.removeSubtasks();
+        }
         System.out.println("Сабтаски успешно удалены");
     }
 
     @Override
     public void removeEpics() {
         epics.clear();
+        for (Subtask s : subtasks.values()) {
+            s.removeEpicId();
+        }
         System.out.println("Эпики успешно удалены");
     }
 
@@ -72,9 +79,9 @@ public class InMemoryTaskManager implements TaskManager {
     //2.4 Создание
     @Override
     public void createTask(Task task) {
+        if (isCrossing(task)) return;
         task.setId(keyID++);
         tasks.put(task.getId(), task);
-        //TaskType.valueOf("TYPE");
         System.out.println("Таск успешно создан");
     }
 
@@ -84,13 +91,17 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Сабтаск не может быть создан, так как указанный Эпик отсутствует.");
             return;
         }
-        if (epics.get(epicID).getStatus().equals(Status.DONE.toString())) {
-            epics.get(epicID).setStatus(Status.IN_PROGRESS);
+        if (isCrossing(subtask)) return;
+        Epic epic = epics.get(epicID);
+        if (epic.getStatus().equals(Status.DONE.toString())) {
+            epic.setStatus(Status.IN_PROGRESS);
         }
         subtask.setEpicId(epicID);
         subtask.setId(keyID++);
         subtasks.put(subtask.getId(), subtask);
-        epics.get(subtask.getEpicId()).addSubtasks(subtask);
+        epic.addSubtask(subtask);
+        epic.setStartTime();
+        epic.setDuration();
         System.out.println("Сабтаск успешно создан и добавлен в эпик");
     }
 
@@ -105,6 +116,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(int keyID, Task task) {
         if (tasks.containsKey(keyID)) {
+            if (isCrossing(task)) return;
             task.setStatus(Status.valueOf(tasks.get(keyID).getStatus()));
             task.setId(keyID);
             tasks.put(task.getId(), task);
@@ -119,12 +131,16 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(int keyID, Subtask subtask) {
         if (subtasks.containsKey(keyID)) {
+            if (isCrossing(subtask)) return;
             subtask.setStatus(Status.valueOf(subtasks.get(keyID).getStatus()));
             subtask.setId(keyID);
             subtask.setEpicId(subtasks.get(keyID).getEpicId());
             subtasks.put(subtask.getId(), subtask);
             System.out.println("Сабтаск успешно обновлен");
-            updateStatus(epics.get(subtasks.get(keyID).getEpicId()));
+            Epic epic = epics.get(subtask.getEpicId());
+            updateStatus(epic);
+            epic.setDuration();
+            epic.setStartTime();
         } else {
             System.out.println("Данный Сабтаск не существует, в связи с " +
                     "этим обновить его невозможно. Попробуйте создать " +
@@ -137,6 +153,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(keyID)) {
             updateStatus(epic);
             epic.setId(keyID);
+            epic.setSubtasks(epics.get(keyID).getSubtasks());
+            epic.setDuration();
+            epic.setStartTime();
             epics.put(epic.getId(), epic);
             System.out.println("Эпик успешно обновлен");
         } else {
@@ -164,7 +183,9 @@ public class InMemoryTaskManager implements TaskManager {
             Subtask subtask = subtasks.get(ID);
             Epic epic = epics.get(subtask.getEpicId());
             subtasks.remove(ID);
-            epic.removeSubtasks(subtask);
+            epic.removeSubtask(subtask);
+            epic.setDuration();
+            epic.setStartTime();
             historyManager.remove(ID);
             System.out.println("Сабтаск успешно удален");
             return;
@@ -181,7 +202,7 @@ public class InMemoryTaskManager implements TaskManager {
             ArrayList<Subtask> copy = new ArrayList<>(subtasks.values());
             for (Subtask subtask : copy) {
                 if (subtask.getEpicId() == ID) {
-                    subtasks.remove(subtask.getId()); //единственная строчка, где использовал поле ID непосредственно объекта
+                    subtasks.remove(subtask.getId());
                     historyManager.remove(subtask.getId());
                 }
             }
@@ -194,13 +215,15 @@ public class InMemoryTaskManager implements TaskManager {
     @Override //3.1 Получение списка всех подзадач определённого эпика
     public List<Subtask> getEpicSubtasks(int ID) {
         if (epics.containsKey(ID)) {
-            ArrayList<Subtask> result = new ArrayList<>();
+            /* ArrayList<Subtask> result = new ArrayList<>();
             for (Subtask subtask : subtasks.values()) {
                 if (subtask.getEpicId() == ID) {
-                    result.add(subtask); //единственная строчка, где использовал поле ID непосредственно объекта
+                    result.add(subtask);
                 }
             }
-            return result;
+            return result;*/
+
+            return epics.get(ID).getSubtasks();
         }
         System.out.println("Указанного Эпика не существует, проверьте правильность введенного ID");
         return null;
@@ -239,5 +262,39 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        startToSort();
+        return new ArrayList<>(sortedTasks.values());
+    }
+
+    //Util methods
+
+    private void startToSort() {
+        sortedTasks.clear();
+        for (Task task : tasks.values()) {
+            sortedTasks.put(task.getStartTime(), task);
+        }
+        for (Task task : subtasks.values()) {
+            sortedTasks.put(task.getStartTime(), task);
+        }
+    }
+
+    private boolean isCrossing(Task task) {
+        LocalDateTime taskStart = task.getStartTime();
+        LocalDateTime taskEnd = task.getEndTime();
+        String message = "К сожалению, таск " + task.toString().toUpperCase() +"\nпересекается по времени с теми, которые уже добавлены...\n" +
+                "Попробуйте выбрать для этого таска иной промежуток времени.";
+        startToSort();
+        for (Task current : sortedTasks.values()) {
+            boolean checkStart = taskStart.isAfter(current.getStartTime()) && taskStart.isBefore(current.getEndTime());
+            boolean checkEnd = taskEnd.isAfter(current.getStartTime()) && taskEnd.isBefore(current.getEndTime());
+            if (checkStart || checkEnd) {
+                System.out.println(message);
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
