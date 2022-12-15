@@ -8,6 +8,7 @@ import java.util.*;
 public class InMemoryTaskManager implements TaskManager {
     //поля
     protected HistoryManager historyManager = Managers.getDefaultHistory();
+
     protected int keyID = 0;
 
     protected HashMap<Integer, Task> tasks = new HashMap<>(); // хранит задачи типа Task
@@ -32,6 +33,11 @@ public class InMemoryTaskManager implements TaskManager {
         return epics;
     }
 
+    @Override
+    public int getKeyID() {
+        return keyID;
+    }
+
     //2.2 Удаление всех задач
     @Override
     public void removeTasks() {
@@ -47,27 +53,31 @@ public class InMemoryTaskManager implements TaskManager {
         }
         System.out.println("Сабтаски успешно удалены");
     }
-
+    //некорректно отрабатывал
     @Override
     public void removeEpics() {
         epics.clear();
-        for (Subtask s : subtasks.values()) {
-            s.removeEpicId();
-        }
+        subtasks.clear();
         System.out.println("Эпики успешно удалены");
     }
 
     @Override
     //2.3 Получение по идентификатору
     public Task getTaskOnID(int ID) {
-        historyManager.add(tasks.get(ID));
-        return tasks.get(ID);
+        Task task = tasks.get(ID);
+        if (task != null) {
+            historyManager.add(tasks.get(ID));
+        }
+        return task;
     }
 
     @Override
     public Subtask getSubtaskOnID(int ID) {
-        historyManager.add(subtasks.get(ID));
-        return subtasks.get(ID);
+        Subtask subtask = subtasks.get(ID);
+        if (subtask != null) {
+            historyManager.add(subtasks.get(ID));
+        }
+        return subtask;
     }
 
     @Override
@@ -78,20 +88,23 @@ public class InMemoryTaskManager implements TaskManager {
 
     //2.4 Создание
     @Override
-    public void createTask(Task task) {
-        if (isCrossing(task)) return;
+    public Task createTask(Task task) {
+        if (task == null) return null;
+        if (isCrossing(task)) return null;
         task.setId(keyID++);
         tasks.put(task.getId(), task);
         System.out.println("Таск успешно создан");
+        return task;
     }
 
     @Override
-    public void createSubtask(int epicID, Subtask subtask) {
+    public Subtask createSubtask(int epicID, Subtask subtask) {
+        if (subtask == null) return null;
         if (!epics.containsKey(epicID)) {
             System.out.println("Сабтаск не может быть создан, так как указанный Эпик отсутствует.");
-            return;
+            return null;
         }
-        if (isCrossing(subtask)) return;
+        if (isCrossing(subtask)) return null;
         Epic epic = epics.get(epicID);
         if (epic.getStatus().equals(Status.DONE.toString())) {
             epic.setStatus(Status.IN_PROGRESS);
@@ -103,18 +116,25 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setStartTime();
         epic.setDuration();
         System.out.println("Сабтаск успешно создан и добавлен в эпик");
+        return subtask;
     }
 
     @Override
-    public void createEpic(Epic epic) {
+    public Epic createEpic(Epic epic) {
+        if (epic == null) return null;
         epic.setId(keyID++);
         epics.put(epic.getId(), epic);
         System.out.println("Эпик успешно создан");
+        return epic;
     }
 
     //2.5 Обновление
     @Override
     public void updateTask(int keyID, Task task) {
+        if (task == null) {
+            System.out.println("Переданный таск is null, обновление невозможно");
+            return;
+        }
         if (tasks.containsKey(keyID)) {
             if (isCrossing(task)) return;
             task.setStatus(Status.valueOf(tasks.get(keyID).getStatus()));
@@ -130,6 +150,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(int keyID, Subtask subtask) {
+        if (subtask == null) {
+            System.out.println("Переданный сабтаск is null, обновление невозможно");
+            return;
+        }
         if (subtasks.containsKey(keyID)) {
             if (isCrossing(subtask)) return;
             subtask.setStatus(Status.valueOf(subtasks.get(keyID).getStatus()));
@@ -150,6 +174,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateEpic(int keyID, Epic epic) {
+        if (epic == null) {
+            System.out.println("Переданный эпик is null, обновление невозможно");
+            return;
+        }
         if (epics.containsKey(keyID)) {
             updateStatus(epic);
             epic.setId(keyID);
@@ -192,20 +220,19 @@ public class InMemoryTaskManager implements TaskManager {
         }
         System.out.println("Указанного Сабтаска не существует, проверьте правильность введенного ID");
     }
-
+    //некорректно отрабатывал, доработать с ХМ
     @Override
     public void removeEpicOnID(int ID) {
         if (epics.containsKey(ID)) {
+            //Set<Map.Entry<Integer, Subtask>> subt = subtasks.entrySet();
+            //for (Map.Entry<Integer, Subtask> s : subtasks.entrySet()) {
+            ArrayList<Subtask> copyES = new ArrayList<>(epics.get(ID).getSubtasks());
+            for (Subtask subtask : copyES) {
+                subtasks.remove(subtask.getId());
+            }
             epics.remove(ID);
             historyManager.remove(ID);
-
-            ArrayList<Subtask> copy = new ArrayList<>(subtasks.values());
-            for (Subtask subtask : copy) {
-                if (subtask.getEpicId() == ID) {
-                    subtasks.remove(subtask.getId());
-                    historyManager.remove(subtask.getId());
-                }
-            }
+            //historyManager.remove(subtask.getId());
             System.out.println("Эпик и его Сабтаски успешно удалены");
             return;
         }
@@ -258,7 +285,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getHistory() {
-        System.out.println("История задач");
         return historyManager.getHistory();
     }
 
@@ -269,7 +295,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Util methods
-
     private void startToSort() {
         sortedTasks.clear();
         for (Task task : tasks.values()) {

@@ -1,7 +1,7 @@
 package Test;
 
 import manager.HistoryManager;
-import manager.InMemoryHistoryManager;
+import manager.Managers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Status;
@@ -32,7 +32,7 @@ class InMemoryHistoryManagerTest {
 
     @BeforeEach
     public void shouldRunBeforeEach() {
-        manager = new InMemoryHistoryManager();
+        manager = Managers.getDefaultHistory();
     }
 
     @Test
@@ -40,15 +40,19 @@ class InMemoryHistoryManagerTest {
         Task task1 = createTask();
         int testTaskId1 = generateId();
         task1.setId(testTaskId1);
+
         Task task2 = createTask();
         int testTaskId2 = generateId();
         task2.setId(testTaskId2);
+
         Task task3 = createTask();
         int testTaskId3 = generateId();
         task3.setId(testTaskId3);
+
         manager.add(task1);
         manager.add(task2);
         manager.add(task3);
+
         assertEquals(List.of(task1, task2, task3), manager.getHistory());
     }
 
@@ -57,18 +61,23 @@ class InMemoryHistoryManagerTest {
         Task task1 = createTask();
         int testTaskId1 = generateId();
         task1.setId(testTaskId1);
+
         Task task2 = createTask();
         int testTaskId2 = generateId();
         task2.setId(testTaskId2);
+
         Task task3 = createTask();
         int testTaskId3 = generateId();
         task3.setId(testTaskId3);
+
         manager.add(task1);
         manager.add(task2);
         manager.add(task3);
         manager.remove(task1.getId());
         manager.remove(task2.getId());
-        assertEquals(List.of(task1, task2, task3), manager.getHistory());
+        manager.remove(task3.getId());
+
+        assertEquals(Collections.EMPTY_LIST, manager.getHistory());
     }
 
     @Test
@@ -76,9 +85,21 @@ class InMemoryHistoryManagerTest {
         Task task1 = createTask();
         int testTaskId1 = generateId();
         task1.setId(testTaskId1);
+
+        Task task2 = createTask();
+        int testTaskId2 = generateId();
+        task2.setId(testTaskId2);
+
+        Task task3 = createTask();
+        int testTaskId3 = generateId();
+        task3.setId(testTaskId3);
+
         manager.add(task1);
+        manager.add(task2);
+        manager.add(task3);
         manager.remove(task1.getId());
-        assertEquals(Collections.EMPTY_LIST, manager.getHistory());
+
+        assertEquals(List.of(task2, task3), manager.getHistory());
     }
 
     @Test
@@ -86,15 +107,19 @@ class InMemoryHistoryManagerTest {
         Task task1 = createTask();
         int testTaskId1 = generateId();
         task1.setId(testTaskId1);
+
         Task task2 = createTask();
         int testTaskId2 = generateId();
         task2.setId(testTaskId2);
+
         Task task3 = createTask();
         int testTaskId3 = generateId();
         task3.setId(testTaskId3);
+
         manager.remove(task1.getId());
         manager.remove(task2.getId());
         manager.remove(task3.getId());
+
         assertEquals(Collections.EMPTY_LIST, manager.getHistory());
     }
 
@@ -102,9 +127,11 @@ class InMemoryHistoryManagerTest {
     public void shouldNotRemoveTaskWithIncorrectId() {
         Task task1 = createTask();
         int testTaskId1 = generateId();
+
         task1.setId(testTaskId1);
         manager.add(task1);
-        manager.remove(0);
+        manager.remove(999);
+
         assertEquals(List.of(task1), manager.getHistory());
     }
 }

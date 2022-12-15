@@ -15,9 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 
-import static manager.Managers.getDefaultHistory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
@@ -34,7 +32,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         try {
             Files.delete(path);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Упс, файл не создавался");
         }
     }
 
@@ -53,29 +51,38 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
                 Status.NEW,
                 LocalDateTime.now(),
                 0);
+
         manager.createEpic(epic);
-        FileBackedTasksManager.loadFromFile(file);
-        assertEquals(0, manager.getTasks().size());
-        assertEquals(0, manager.getEpics().size());
+        //manager.getTaskOnID(0);
+
+        manager = FileBackedTasksManager.loadFromFile(file);
+        assertEquals(1, manager.getTasks().size());
+        assertEquals(1, manager.getEpics().size());
+        assertEquals(0, manager.getSubtasks().size());
+
     }
 
     @Test
     public void shouldCheckThatAllEmptyFilesSaveAndLoadSuccessful() {
         FileBackedTasksManager fileManager = (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
+
         assert fileManager != null;
         fileManager.save();
         FileBackedTasksManager.loadFromFile(file);
-        assertEquals(0, manager.getTasks().size());
-        assertEquals(0, manager.getEpics().size());
-        assertEquals(0, manager.getSubtasks().size());
+
+        assertEquals(0, fileManager.getTasks().size());
+        assertEquals(0, fileManager.getEpics().size());
+        assertEquals(0, fileManager.getSubtasks().size());
     }
 
     @Test
     public void shouldSaveAndLoadEmptyHistory() {
         FileBackedTasksManager fileManager = (FileBackedTasksManager) Managers.getDefault(TaskManagerType.FILE_BACKEND);
+
         assert fileManager != null;
         fileManager.save();
         FileBackedTasksManager.loadFromFile(file);
+
         assertEquals(Collections.EMPTY_LIST, manager.getHistory());
     }
 

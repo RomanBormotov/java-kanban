@@ -3,10 +3,8 @@ package manager;
 import tasks.*;
 
 import java.io.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -79,8 +77,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             Если task.id > generatorId, то generatorId = task.id
             если мы наткнулись на пустую строку, то это - история, то парсим её
             добавить таск в соответсвующую мапу (switch по типу) */
-
-            for (int i = 1; i < buffer.length - 2; i++) {
+            for (int i = 1; i < buffer.length-2 ; i++) {
                 Task task = CSVTaskConverter.fromString(buffer[i]);
                 if (task.getId() > generatorId) {
                     generatorId = task.getId();
@@ -105,8 +102,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 }
             }
-
-            List<Integer> history = CSVTaskConverter.historyFromString(buffer[buffer.length-1]);
+            List<Integer> history = new ArrayList<>();
+            if (buffer[buffer.length-1].equals("History:")) {
+                System.out.println("Упс, история пуста");
+            } else {
+                history = CSVTaskConverter.historyFromString(buffer[buffer.length - 1]);
+            }
             /* String[] history = buffer[buffer.length-1].split(",");
             дообработать историю
             пройтись по списку id из десериализованной истории и добавить в историю с помощью уже существующего метода
@@ -151,7 +152,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 fileWriter.newLine();
             }
             fileWriter.newLine();
-            fileWriter.write(CSVTaskConverter.historyToString(this.getHistory()));
+            fileWriter.write("History:");
+            fileWriter.newLine();
+            fileWriter.write(CSVTaskConverter.historyToString(getHistory()));
 
         } catch (IOException e) {
             throw new ManagerSaveException();
@@ -198,21 +201,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
+    public Task createTask(Task task) {
         super.createTask(task);
         save();
+        return task;
     }
 
     @Override
-    public void createSubtask(int epicID, Subtask subtask) {
+    public Subtask createSubtask(int epicID, Subtask subtask) {
         super.createSubtask(epicID, subtask);
         save();
+        return subtask;
     }
 
     @Override
-    public void createEpic(Epic epic) {
+    public Epic createEpic(Epic epic) {
         super.createEpic(epic);
         save();
+        return epic;
     }
 
     @Override

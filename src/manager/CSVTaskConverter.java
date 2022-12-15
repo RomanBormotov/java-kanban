@@ -62,7 +62,6 @@ public class CSVTaskConverter {
                 subtask.setEpicId(epicId);
                 subtask.setStartTime(startTime);
                 subtask.setDuration(Duration.ofMinutes(duration));
-                subtask.setEpicId(-1);
                 return subtask;
         }
         return null;
@@ -72,6 +71,7 @@ public class CSVTaskConverter {
         List<Integer> history = new ArrayList<>();
         String [] splitString = value.split(",");
         for (String s : splitString) {
+
             history.add(Integer.valueOf(s));
         }
         return history;
