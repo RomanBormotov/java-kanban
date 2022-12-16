@@ -1,6 +1,8 @@
 package tasks;
 
-import java.time.Duration;
+import constants.Status;
+import constants.TaskType;
+
 import java.time.LocalDateTime;
 
 public class Subtask extends Task {

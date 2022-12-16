@@ -5,9 +5,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
-import tasks.Status;
+import constants.Status;
 import tasks.Task;
-import tasks.TaskManagerType;
+import constants.TaskManagerType;
+import util.Managers;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,10 +30,12 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @AfterEach
     public void shouldRunAfterEach() {
-        try {
-            Files.delete(path);
-        } catch (IOException e) {
-            System.out.println("Упс, файл не создавался");
+        if (file.exists()) {
+            try {
+                Files.delete(path);
+            } catch (IOException e) {
+                System.out.println("Упс, файл не создавался");
+            }
         }
     }
 

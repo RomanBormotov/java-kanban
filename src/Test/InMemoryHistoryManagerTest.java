@@ -1,10 +1,10 @@
 package Test;
 
 import manager.HistoryManager;
-import manager.Managers;
+import util.Managers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasks.Status;
+import constants.Status;
 import tasks.Task;
 
 import java.time.LocalDateTime;

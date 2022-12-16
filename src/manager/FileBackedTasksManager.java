@@ -1,6 +1,11 @@
 package manager;
 
+import constants.Status;
+import constants.TaskManagerType;
+import exceptions.ManagerSaveException;
 import tasks.*;
+import util.CSVTaskConverter;
+import util.Managers;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -77,7 +82,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             Если task.id > generatorId, то generatorId = task.id
             если мы наткнулись на пустую строку, то это - история, то парсим её
             добавить таск в соответсвующую мапу (switch по типу) */
-            for (int i = 1; i < buffer.length-2 ; i++) {
+            for (int i = 1; i < buffer.length-3 ; i++) {
                 Task task = CSVTaskConverter.fromString(buffer[i]);
                 if (task.getId() > generatorId) {
                     generatorId = task.getId();
@@ -103,7 +108,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
             List<Integer> history = new ArrayList<>();
-            if (buffer[buffer.length-1].equals("History:")) {
+            if (buffer[buffer.length-1].equals("isEmpty")) {
                 System.out.println("Упс, история пуста");
             } else {
                 history = CSVTaskConverter.historyFromString(buffer[buffer.length - 1]);
