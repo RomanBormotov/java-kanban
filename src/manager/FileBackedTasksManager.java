@@ -2,7 +2,7 @@ package manager;
 
 import constants.Status;
 import constants.TaskManagerType;
-import exceptions.ManagerSaveException;
+import exceptions.ManagerException;
 import tasks.*;
 import util.CSVTaskConverter;
 import util.Managers;
@@ -127,6 +127,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     fileBackedTasksManager.historyManager.add(fileBackedTasksManager.tasks.get(currentId));
                 }
             }
+            fileBackedTasksManager.startToSort();
             // не забывать привзять новый generatorId
             fileBackedTasksManager.keyID = generatorId;
 
@@ -162,7 +163,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             fileWriter.write(CSVTaskConverter.historyToString(getHistory()));
 
         } catch (IOException e) {
-            throw new ManagerSaveException();
+            throw new ManagerException("Сохранение не удалось");
         }
     }
 

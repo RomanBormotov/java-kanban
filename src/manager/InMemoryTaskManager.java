@@ -1,6 +1,7 @@
 package manager;
 
 import constants.Status;
+import exceptions.ManagerException;
 import tasks.*;
 import util.Managers;
 
@@ -18,6 +19,41 @@ public class InMemoryTaskManager implements TaskManager {
     protected HashMap<Integer, Epic> epics = new HashMap<>(); // хранит задачи типа Epic
     protected TreeMap<LocalDateTime, Task> sortedTasks = new TreeMap<>();
 
+    private void removeFromSorted(Task task) {
+        /*for (Task curTask : sortedTasks.values()) {
+            if (curTask.equals(task)) {
+                sortedTasks.remove(curTask.getStartTime());
+            }
+        }*/
+        sortedTasks.remove(task.getStartTime());
+    }
+
+    private void removeFromSorted(Collection<? extends Task> tasks) {
+        /*for (Task innerTask : sortedTasks.values()) {
+            for (Task outTask : tasks) {
+                if (innerTask.equals(outTask)) {
+                    sortedTasks.remove(innerTask.getStartTime());
+                }
+             }
+         }*/
+        for (Task outTask : tasks) {
+            sortedTasks.remove(outTask.getStartTime());
+        }
+    }
+
+    private void addToSorted(Task task) {
+        sortedTasks.put(task.getStartTime(), task);
+    }
+
+    private void updateSorted(Task task) {
+        Map<LocalDateTime, Task> copy = new TreeMap<>(sortedTasks);
+        for (Task curTask : copy.values()) {
+            if (curTask.getId() == task.getId()) {
+                sortedTasks.remove(curTask.getStartTime());
+                sortedTasks.put(task.getStartTime(), task);
+            }
+        }
+    }
     //методы
     //2.1 Получение списка всех задач
     @Override
@@ -43,12 +79,14 @@ public class InMemoryTaskManager implements TaskManager {
     //2.2 Удаление всех задач
     @Override
     public void removeTasks() {
+        removeFromSorted(tasks.values());
         tasks.clear();
         System.out.println("Таски успешно удалены");
     }
 
     @Override
     public void removeSubtasks() {
+        removeFromSorted(subtasks.values());
         subtasks.clear();
         for (Epic e : epics.values()) {
             e.removeSubtasks();
@@ -59,6 +97,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpics() {
         epics.clear();
+        removeFromSorted(subtasks.values());
         subtasks.clear();
         System.out.println("Эпики успешно удалены");
     }
@@ -95,6 +134,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (isCrossing(task)) return null;
         task.setId(keyID++);
         tasks.put(task.getId(), task);
+        addToSorted(task);
         System.out.println("Таск успешно создан");
         return task;
     }
@@ -114,6 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setEpicId(epicID);
         subtask.setId(keyID++);
         subtasks.put(subtask.getId(), subtask);
+        addToSorted(subtask);
         epic.addSubtask(subtask);
         epic.setStartTime();
         epic.setDuration();
@@ -142,6 +183,7 @@ public class InMemoryTaskManager implements TaskManager {
             task.setStatus(Status.valueOf(tasks.get(keyID).getStatus()));
             task.setId(keyID);
             tasks.put(task.getId(), task);
+            updateSorted(task);
             System.out.println("Таск успешно обновлен");
         } else {
             System.out.println("Данный таск не существует, в связи с " +
@@ -162,6 +204,7 @@ public class InMemoryTaskManager implements TaskManager {
             subtask.setId(keyID);
             subtask.setEpicId(subtasks.get(keyID).getEpicId());
             subtasks.put(subtask.getId(), subtask);
+            updateSorted(subtask);
             System.out.println("Сабтаск успешно обновлен");
             Epic epic = epics.get(subtask.getEpicId());
             updateStatus(epic);
@@ -199,6 +242,7 @@ public class InMemoryTaskManager implements TaskManager {
     //2.6 Удаление по идентификатору
     public void removeTaskOnID(int ID) {
         if (tasks.containsKey(ID)) {
+            removeFromSorted(tasks.get(ID));
             tasks.remove(ID);
             historyManager.remove(ID);
             System.out.println("Таск успешно удален");
@@ -212,6 +256,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtasks.containsKey(ID)) {
             Subtask subtask = subtasks.get(ID);
             Epic epic = epics.get(subtask.getEpicId());
+            removeFromSorted(subtasks.get(ID));
             subtasks.remove(ID);
             epic.removeSubtask(subtask);
             epic.setDuration();
@@ -226,10 +271,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpicOnID(int ID) {
         if (epics.containsKey(ID)) {
-            //Set<Map.Entry<Integer, Subtask>> subt = subtasks.entrySet();
-            //for (Map.Entry<Integer, Subtask> s : subtasks.entrySet()) {
             ArrayList<Subtask> copyES = new ArrayList<>(epics.get(ID).getSubtasks());
             for (Subtask subtask : copyES) {
+                removeFromSorted(subtask);
                 subtasks.remove(subtask.getId());
             }
             epics.remove(ID);
@@ -292,12 +336,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getPrioritizedTasks() {
-        startToSort();
         return new ArrayList<>(sortedTasks.values());
     }
 
     //Util methods
-    private void startToSort() {
+    //ИСПОЛЬЗУЕМ ДАННЫЙ МЕТОД В FILEBACKEDTASKAMANGER В МЕТОДЕ LOADFROMFILE
+    protected void startToSort() {
         sortedTasks.clear();
         for (Task task : tasks.values()) {
             sortedTasks.put(task.getStartTime(), task);
@@ -308,11 +352,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private boolean isCrossing(Task task) {
+        if (task.getStartTime() == null || task.getDuration() == null) {
+            throw new ManagerException("у таска отсутствует время начала или длительность.., проверка невозможна");
+        }
         LocalDateTime taskStart = task.getStartTime();
         LocalDateTime taskEnd = task.getEndTime();
         String message = "К сожалению, таск " + task.toString().toUpperCase() +"\nпересекается по времени с теми, которые уже добавлены...\n" +
                 "Попробуйте выбрать для этого таска иной промежуток времени.";
-        startToSort();
         for (Task current : sortedTasks.values()) {
             boolean checkStart = taskStart.isAfter(current.getStartTime()) && taskStart.isBefore(current.getEndTime());
             boolean checkEnd = taskEnd.isAfter(current.getStartTime()) && taskEnd.isBefore(current.getEndTime());
